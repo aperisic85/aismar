@@ -1,8 +1,8 @@
-use tokio::{io::BufReader, net::TcpStream, time};
-use tokio::io::AsyncBufReadExt;
-use crate::{config::AisConfig, ais::decoder};
-use std::sync::Arc;
+use crate::{ais::decoder, config::AisConfig};
 use anyhow::Context;
+use std::sync::Arc;
+use tokio::io::AsyncBufReadExt;
+use tokio::{io::BufReader, net::TcpStream, time};
 
 pub struct AisConnection {
     stream: BufReader<TcpStream>,
@@ -21,15 +21,13 @@ impl AisConnection {
 
     pub async fn handle(mut self) -> anyhow::Result<()> {
         let mut buffer = String::new();
-        
+
         loop {
             buffer.clear();
-            
-            let read_result = time::timeout(
-                self.config.read_timeout,
-                self.stream.read_line(&mut buffer)
-            ).await;
-            
+
+            let read_result =
+                time::timeout(self.config.read_timeout, self.stream.read_line(&mut buffer)).await;
+
             match read_result {
                 Ok(Ok(0)) => break, // Clean disconnect
                 Ok(Ok(_)) => {
@@ -40,7 +38,7 @@ impl AisConnection {
                 Err(_) => return Err(anyhow::anyhow!("Read timeout")),
             }
         }
-        
+
         Ok(())
     }
 }

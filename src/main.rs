@@ -1,6 +1,6 @@
-mod config;
-mod client;
 mod ais;
+mod client;
+mod config;
 
 use crate::config::AisConfig;
 
