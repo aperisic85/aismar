@@ -11,7 +11,7 @@ pub struct AisConfig {
 impl Default for AisConfig {
     fn default() -> Self {
         Self {
-            endpoint: "ais.example.com:1234".into(),
+            endpoint: "192.168.51.121:4712".into(),
             max_reconnect_attempts: 5,
             reconnect_delay: Duration::from_secs(5),
             read_timeout: Duration::from_secs(30),
