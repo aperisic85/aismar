@@ -86,9 +86,23 @@ impl AisDecoder {
                 
                 if let Some((status_byte, page_id)) = self.extract_aton_status(raw_sentence) {
                     // Parse status components for Page ID 7 (Most common operational status)
-                    let (racon_status, light_status) = parse_aton_status(status_byte, page_id);
+                    if page_id == 7 {
+                        let (racon_status, light_status) = parse_aton_status(status_byte, page_id);
+                        println!("[Type {}] AtoN {}: {} ({:?})",
+                            aton.message_type,
+                            aton.mmsi,
+                            aton.name,
+                            aton.aid_type
+                        );
+                        println!("  → Status: Page {} | RACON: {:?} | Light: {:?} | Off-position: {}",
+                            page_id,
+                            racon_status,
+                            light_status,
+                            aton.off_position
+                        );
+                    }
                     
-                    println!("[Type {}] AtoN {}: {} ({:?})",
+                    /* println!("[Type {}] AtoN {}: {} ({:?})",
                         aton.message_type,
                         aton.mmsi,
                         aton.name,
@@ -99,7 +113,7 @@ impl AisDecoder {
                         racon_status,
                         light_status,
                         aton.off_position
-                    );
+                    ); */
                 }
             
                 
