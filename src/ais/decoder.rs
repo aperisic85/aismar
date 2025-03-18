@@ -108,7 +108,7 @@ impl AisDecoder {
                         light_status,
                         aton.off_position
                     ); */
-               // }
+                }
 
                 /* if (43.0..44.0).contains(&aton.latitude.unwrap_or(0 as f32)) &&
                    (16.0..17.0).contains(&aton.longitude.unwrap_or(0.0)) {
