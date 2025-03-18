@@ -241,7 +241,7 @@ impl AisDecoder {
 }
 pub fn parse_aton_status(status_byte: u8, page_id: u8) -> (RaconStatus, LightStatus) {
     match page_id {
-        7 => {
+        _ => {
             // IALA Page 7: Operational Status
             let racon_bits = (status_byte >> 3) & 0b11;
             let light_bits = status_byte & 0b11;
