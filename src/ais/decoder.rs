@@ -220,7 +220,8 @@ impl AisDecoder {
             .context("Invalid binary status bits")?;
         //let status_byte = status_byte.reverse_bits(); //changed reverse
         // Step 6: Extract page ID (first 3 bits of the status byte)
-        let page_id = (status_byte.reverse_bits() >> 5) & 0b111; //changed reverse
+        println!("status_byte: {:08b}", status_byte);
+        let page_id = (status_byte >> 5) & 0b111; //changed reverse
     
         Ok((status_byte, page_id))
     }
@@ -229,7 +230,7 @@ impl AisDecoder {
 }
 pub fn parse_aton_status(status_byte: u8, page_id: u8) -> (RaconStatus, LightStatus) {
     match page_id {
-        _ => {
+        7 => {
             // IALA Page 7: Operational Status
             let racon_bits = (status_byte >> 3) & 0b11;
             let light_bits = status_byte & 0b11;
