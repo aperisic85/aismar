@@ -11,8 +11,8 @@ async fn main() -> anyhow::Result<()> {
     // Create configuration with multiple endpoints
     let config = AisConfig {
         endpoints: vec![
-            "192.168.52.161:4712".into(), // Labinstica
-            "192.168.55.162:4712".into(), // VDG
+            "192.168.55.161:4712".into(), // Labinstica
+            "192.168.52.162:4712".into(), // VDG
             "192.168.61.162:4712".into(), // ucka
             "192.168.6.162:4712".into(), // osor
 
