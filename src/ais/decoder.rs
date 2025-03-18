@@ -85,7 +85,7 @@ impl AisDecoder {
                  let (status_byte, page_id) = self.extract_aton_status(raw_sentence)? ;
                     // Parse status components for Page ID 7 (Most common operational status)
                    //if page_id == 7 {
-                        let (racon_status, light_status) = parse_aton_status(status_byte, page_id);
+                        let (racon_status, light_status) = parse_aton_status(status_byte.reverse_bits(), page_id);
                         println!(
                             "[Type {}] AtoN {}: {} ({:?})",
                             aton.message_type, aton.mmsi, aton.name, aton.aid_type
