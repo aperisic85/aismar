@@ -117,11 +117,11 @@ impl AisDecoder {
                 } */
 
                 
-                println!("[Type {}] AtoN {}: {} ({:?})",
+               /*  println!("[Type {}] AtoN {}: {} ({:?})",
                     aton.message_type,
                     aton.mmsi,
                     aton.name,
-                    aton.aid_type,);   
+                    aton.aid_type,);    */
                      
            }
             AisMessage::StaticDataReport(sdr) => {
