@@ -85,7 +85,7 @@ impl AisDecoder {
             AisMessage::AidToNavigationReport(aton) => {
                  let (status_byte, page_id) = self.extract_aton_status(raw_sentence)? ;
                     // Parse status components for Page ID 7 (Most common operational status)
-                  // if page_id == 7 {
+                   if page_id == 7 {
                         let (racon_status, light_status) = parse_aton_status(status_byte.reverse_bits(), page_id);
                         println!(
                             "[Type {}] AtoN {}: {} ({:?})",
@@ -109,7 +109,7 @@ impl AisDecoder {
                         light_status,
                         aton.off_position
                     ); */
-               // }
+                }
 
                 /* if (43.0..44.0).contains(&aton.latitude.unwrap_or(0 as f32)) &&
                    (16.0..17.0).contains(&aton.longitude.unwrap_or(0.0)) {
