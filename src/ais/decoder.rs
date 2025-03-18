@@ -1,5 +1,4 @@
-use ais::AisParser;
-use ais::*;
+use ais::{AisParser, messages::AisMessage, AisFragments};
 use anyhow::Result;
 
 pub struct AisDecoder {
@@ -16,8 +15,11 @@ impl AisDecoder {
     pub async fn process(&mut self, nmea_sentence: &str) -> Result<()> {
         match self.parser.parse(nmea_sentence.as_bytes(), true) {
             Ok(fragments) => {
-                if let Some(msg) = fragments.into_message() {
-                    self.handle_message(msg).await?;
+                // Pattern match on AisFragments variants
+                if let AisFragments::Complete(sentence) = fragments {
+                    if let Some(msg) = sentence.message {
+                        self.handle_message(msg).await?;
+                    }
                 }
             }
             Err(e) => eprintln!("Decode error: {}", e),
@@ -25,15 +27,18 @@ impl AisDecoder {
         Ok(())
     }
 
-    async fn handle_message(&self, msg: ais::messages::AisMessage) -> Result<()> {
+    async fn handle_message(&self, msg: AisMessage) -> Result<()> {
         match msg {
-            ais::messages::AisMessage::PositionReport(pos) => {
-                println!("Vessel {}: {:?}", pos.mmsi, pos.position);
+            AisMessage::PositionReport(pos) => {
+                println!("Vessel pos accuracy{}: {:?}", pos.mmsi, pos.position_accuracy);
             }
-            ais::messages::AisMessage::AidToNavigationReport(aton) => {
+            AisMessage::AidToNavigationReport(aton) => {
                 println!("AtoN {}: {}", aton.mmsi, aton.name);
             }
-            _ => {} // Handle other message types
+            AisMessage::DataLinkManagementMessage(dlm) => {
+                println!("MMSI {} reserved slots", dlm.mmsi);
+            }
+            _ => println!("Unhandled message type: {:?}", msg),
         }
         Ok(())
     }

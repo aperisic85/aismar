@@ -7,7 +7,7 @@ use crate::config::AisConfig;
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     let config = AisConfig {
-        endpoint: "ais.xxx.com:1234".into(), // Your AIS provider
+        endpoint: "192.168.52.161:4712".into(), // Labinstica
         ..Default::default()
     };
 
