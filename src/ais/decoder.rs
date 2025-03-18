@@ -1,24 +1,9 @@
 use ais::{AisParser, messages::AisMessage, AisFragments};
+use super::msg21::{RaconStatus, LightStatus};
 
 use anyhow::Result;
 
 #[derive(Debug)]
-pub enum RaconStatus {
-    NotFitted,
-    NotMonitored,
-    Operational,
-    Test,
-    Unknown,
-}
-
-#[derive(Debug)]
-enum LightStatus {
-    None,
-    On,
-    Off,
-    Reserved,
-    Unknown,
-}
 pub struct AisDecoder {
     parser: AisParser,
 }
