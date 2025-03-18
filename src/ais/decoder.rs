@@ -117,8 +117,8 @@ impl AisDecoder {
                 }
             
                
-                if (43.0..44.0).contains(&aton.latitude.decimal_degrees()) &&
-                   (16.0..17.0).contains(&aton.longitude.decimal_degrees()) {
+                if (43.0..44.0).contains(&aton.latitude.unwrap()) &&
+                   (16.0..17.0).contains(&aton.longitude.unwrap()) {
                     println!("Dalmatian AtoN: {}", aton.name);
                 }
                 
@@ -147,8 +147,7 @@ impl AisDecoder {
                     srm.text
                 ); */
             }
-            AisMessage::BinaryAddressedMessage(bam) => { /* Type 6 TODO*/ }
-            AisMessage::BinaryAcknowledge(ba) => { /* Type 7  TODO*/ }
+            AisMessage::BinaryAcknowledgeMessage(ba) => { /* Type 7  TODO*/ }
             
             AisMessage::BinaryBroadcastMessage(bbm) => {
                 /* println!("[Type {}] Binary Broadcast {}: {} bytes", 
@@ -157,7 +156,6 @@ impl AisDecoder {
                     bbm.data.len()
                 ); */
             }
-            AisMessage::StandardSarAircraftReport(sar) => { /* Type 9 TODO */ }
             AisMessage::UtcDateResponse(udr) => {
                /*  println!("[Type {}] UTC Date- hour: {}{}:{} UTC", 
                     udr.message_type,
