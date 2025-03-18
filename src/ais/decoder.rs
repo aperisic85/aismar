@@ -223,16 +223,16 @@ impl AisDecoder {
         
         let page_id = (status_byte >> 5) & 0b111; 
           // Debugging Output
-    println!("Binary Payload: {}", binary);
+    /* println!("Binary Payload: {}", binary);
     println!("Status Bits [148-155]: {}", status_bits);
     println!("Status Byte (before reversal): {:08b}", status_byte);
-
+ */
     // Reverse bits if necessary
     status_byte = status_byte.reverse_bits();
-    println!("Status Byte (after reversal): {:08b}", status_byte);
+    //println!("Status Byte (after reversal): {:08b}", status_byte);
 
     let page_id = (status_byte >> 5) & 0b111;
-    println!("Page ID: {}", page_id);
+   // println!("Page ID: {}", page_id);
     
         Ok((status_byte, page_id))
     }
