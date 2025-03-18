@@ -228,13 +228,13 @@ impl AisDecoder {
     println!("Status Byte (before reversal): {:08b}", status_byte);
  */
     // Reverse bits if necessary
-    let status_byter= status_byte.reverse_bits();
+    let reverse_status_byte= status_byte.reverse_bits();
     //println!("Status Byte (after reversal): {:08b}", status_byte);
 
-    let page_id = (status_byter >> 5) & 0b111;
+    let page_id = (status_byte >> 5) & 0b111;
    // println!("Page ID: {}", page_id);
     
-        Ok((status_byter, page_id))
+        Ok((status_byte, page_id))
     }
     
    
