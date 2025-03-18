@@ -2,25 +2,36 @@ mod ais;
 mod client;
 mod config;
 
+
 use crate::config::AisConfig;
+use crate::client::connection::AisConnectionManager;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    // Update configuration to support multiple endpoints
+    // Create configuration with multiple endpoints
     let config = AisConfig {
         endpoints: vec![
             "192.168.52.161:4712".into(), // Labinstica
-            "192.168.54.162:4712".into(), // Vidova gora
-            "192.168.61.162:4712".into(), // Ucka
+            "192.168.55.162:4712".into(), // VDG
+            "192.168.61.162:4712".into(), // ucka
+            "192.168.6.162:4712".into(), // osor
+
         ],
         ..Default::default()
     };
 
-    let mut client = client::AisClient::new(config); // Updated to support multiple endpoints
-    client.run().await?;
+    // Instantiate the connection manager
+    let mut manager = AisConnectionManager::new(config);
 
-    tokio::signal::ctrl_c().await?; // Handle shutdown gracefully
-    client.shutdown().await;
+    // Start the connection manager
+    manager.start().await?;
+
+    // Wait for Ctrl+C signal to gracefully shut down
+    tokio::signal::ctrl_c().await?;
+    println!("Shutting down...");
+
+    // Shutdown the connection manager
+    manager.shutdown().await;
 
     Ok(())
 }
