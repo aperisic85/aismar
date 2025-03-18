@@ -64,7 +64,7 @@ impl AisClient {
         // Monitor received messages from all connections
         tokio::spawn(async move {
             while let Some(message) = rx.recv().await {
-                println!("Received decoded message: {}", message);
+                //println!("Received decoded message: {}", message);
             }
         });
 
