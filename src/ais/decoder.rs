@@ -117,8 +117,8 @@ impl AisDecoder {
                 }
             
                
-                if (43.0..44.0).contains(&aton.latitude.unwrap()) &&
-                   (16.0..17.0).contains(&aton.longitude.unwrap()) {
+                if (43.0..44.0).contains(&aton.latitude.unwrap_or(0 as f32)) &&
+                   (16.0..17.0).contains(&aton.longitude.unwrap_or(0.0)) {
                     println!("Dalmatian AtoN: {}", aton.name);
                 }
                 
