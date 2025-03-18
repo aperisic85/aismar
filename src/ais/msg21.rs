@@ -9,9 +9,16 @@ pub enum RaconStatus {
 
 #[derive(Debug)]
 pub enum LightStatus {
-    None,
+    NoLightOrNotMonitored,
     On,
     Off,
-    Reserved,
+    FailOrReducedRange,
+    Unknown,
+}
+
+#[derive(Debug)]
+pub enum GeneralHealth {
+    Good,
+    Alarm,
     Unknown,
 }

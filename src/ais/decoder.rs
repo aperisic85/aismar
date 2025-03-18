@@ -1,9 +1,8 @@
-use super::msg21::{LightStatus, RaconStatus};
+use super::msg21::{LightStatus, RaconStatus, GeneralHealth};
 use ais::{AisFragments, AisParser, messages::AisMessage};
 use anyhow::Context;
 
 use anyhow::Result;
-use axum::http::status;
 
 #[derive(Debug)]
 pub struct AisDecoder {
@@ -17,20 +16,31 @@ impl AisDecoder {
         }
     }
 
-    pub async fn process(&mut self, nmea_sentence: &str) -> Result<()> {
-        match self.parser.parse(nmea_sentence.as_bytes(), true) {
-            Ok(fragments) => {
-                // Pattern match on AisFragments variants
-                if let AisFragments::Complete(sentence) = fragments {
-                    if let Some(msg) = sentence.message {
-                        self.handle_message(msg, nmea_sentence).await?;
-                    }
+    pub async fn process(&mut self, nmea_sentence: &str) -> anyhow::Result<String> {
+        if let Ok((status_byte, page_id)) = self.extract_aton_status(nmea_sentence) {
+            match page_id {
+                // Handle RACON/Light Status
+                0b111 => {
+                    let (racon_status, light_status, health_status) =
+                        parse_aton_status(status_byte);
+                    Ok(format!(
+                        "Page ID: {}, RACON: {:?}, Light: {:?}, Health: {:?}",
+                        page_id, racon_status, light_status, health_status
+                    ))
                 }
+                // Handle Mobile AtoN
+                0b101 => {
+                    let mobile_aton_status = parse_aton_status(status_byte);
+                    Ok(format!("Page ID: {}, Mobile AtoN Status: {:?}", page_id, mobile_aton_status))
+                }
+                // Handle Regional AtoN or other pages
+                _ => Ok(format!("Page ID: {}, Status Byte: {:08b}", page_id, status_byte)),
             }
-            Err(e) => eprintln!("Decode error: {}", e),
+        } else {
+            Err(anyhow::anyhow!("Failed to extract AtoN status"))
         }
-        Ok(())
     }
+    
 
     async fn handle_message(&self, msg: AisMessage, raw_sentence: &str) -> Result<()> {
         match msg {
@@ -86,7 +96,7 @@ impl AisDecoder {
                  let (status_byte, page_id) = self.extract_aton_status(raw_sentence)? ;
                     // Parse status components for Page ID 7 (Most common operational status)
                    if page_id == 7 {
-                        let (racon_status, light_status) = parse_aton_status(status_byte.reverse_bits(), page_id);
+                        let (racon_status, light_status, health) = parse_aton_status(status_byte.reverse_bits());
                         println!(
                             "[Type {}] AtoN {}: {} ({:?})",
                             aton.message_type, aton.mmsi, aton.name, aton.aid_type
@@ -239,31 +249,38 @@ impl AisDecoder {
     
    
 }
-pub fn parse_aton_status(status_byte: u8, page_id: u8) -> (RaconStatus, LightStatus) {
+fn parse_aton_status(status_byte: u8) -> (Option<RaconStatus>, Option<LightStatus>, GeneralHealth) {
+    // Extract Page ID (Bits 8th, 7th, 6th)
+    let page_id = (status_byte >> 5) & 0b111;
+
     match page_id {
-        7 => {
-            // IALA Page 7: Operational Status
-            let racon_bits = (status_byte >> 3) & 0b11;
-            let light_bits = status_byte & 0b11;
+        0b111 => { // Page ID = 7 (RACON/Light Status)
+            let racon_bits = (status_byte >> 3) & 0b11; // Bits 5th and 4th
+            let light_bits = (status_byte >> 1) & 0b11; // Bits 3rd and 2nd
+            let health_bit = status_byte & 0b1;         // Bit 1st
 
-            let racon_status = match racon_bits {
-                0b00 => RaconStatus::NotFitted,
-                0b01 => RaconStatus::NotMonitored,
-                0b10 => RaconStatus::Operational,
-                0b11 => RaconStatus::Test,
-                _ => unreachable!(),
-            };
-
-            let light_status = match light_bits {
-                0b00 => LightStatus::None,
-                0b01 => LightStatus::On,
-                0b10 => LightStatus::Reserved,
-                0b11 => LightStatus::Off,
-                _ => unreachable!(),
-            };
-
-            (racon_status, light_status)
+            (
+                Some(match racon_bits {
+                    0b00 => RaconStatus::NotFitted,
+                    0b01 => RaconStatus::NotMonitored,
+                    0b10 => RaconStatus::Operational,
+                    0b11 => RaconStatus::Test,
+                    _ => RaconStatus::Unknown,
+                }),
+                Some(match light_bits {
+                    0b00 => LightStatus::NoLightOrNotMonitored,
+                    0b01 => LightStatus::On,
+                    0b10 => LightStatus::Off,
+                    0b11 => LightStatus::FailOrReducedRange,
+                    _ => LightStatus::Unknown,
+                }),
+                match health_bit {
+                    0b0 => GeneralHealth::Good,
+                    0b1 => GeneralHealth::Alarm,
+                    _ => GeneralHealth::Unknown,
+                },
+            )
         }
-        _ => (RaconStatus::Unknown, LightStatus::Unknown),
+        _ => (None, None, GeneralHealth::Unknown), // Other Page IDs not handled here
     }
 }
