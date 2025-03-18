@@ -50,52 +50,52 @@ impl AisDecoder {
     async fn handle_message(&self, msg: AisMessage,raw_sentence: &str) -> Result<()> {
         match msg {
             AisMessage::PositionReport(pos) => {
-                println!("[Type {}] Vessel {}: {:?} {:?} | SOG: {} kt", 
+                /* println!("[Type {}] Vessel {}: {:?} {:?} | SOG: {} kt", 
                     pos.message_type,
                     pos.mmsi, 
                     pos.latitude.unwrap_or(0.0),
                     pos.longitude.unwrap_or(0.0),
                     pos.speed_over_ground.unwrap_or(0.0)
-                );
+                ); */
             }
             AisMessage::BaseStationReport(bs) => {
-                println!("[Type {}] Base Station {}: {:?} UTC", 
+               /*  println!("[Type {}] Base Station {}: {:?} UTC", 
                     bs.message_type,
                     bs.mmsi,
                     bs.hour
-                );
+                ); */
             }
             AisMessage::StaticAndVoyageRelatedData(sdv) => {
-                println!("[Type {}] Vessel {}: {} → {}", 
+               /*  println!("[Type {}] Vessel {}: {} → {}", 
                     sdv.message_type,
                     sdv.mmsi,
                     sdv.vessel_name,
                     sdv.destination
-                );
+                ); */
             }
             AisMessage::StandardClassBPositionReport(scb) => {
-                println!("[Type {}] Class B {}: {:?} {:?} COG: {}", 
+               /*  println!("[Type {}] Class B {}: {:?} {:?} COG: {}", 
                     scb.message_type,
                     scb.mmsi,
                     scb.latitude.unwrap_or(0.0),
                     scb.longitude.unwrap_or(0.0),
                     scb.course_over_ground.unwrap_or(0.0)
-                );
+                ); */
             }
             AisMessage::ExtendedClassBPositionReport(ecb) => {
-                println!("[Type {}] Ext. Class B {}: {:?} {:?}", 
+                /* println!("[Type {}] Ext. Class B {}: {:?} {:?}", 
                     ecb.message_type,
                     ecb.mmsi,
                     ecb.latitude.unwrap_or(0.0),
                     ecb.longitude.unwrap_or(0.0)
-                );
+                ); */
             }
             AisMessage::DataLinkManagementMessage(dlm) => {
-                println!("[Type {}] DLM {}: Reservation {}", 
+               /*  println!("[Type {}] DLM {}: Reservation {}", 
                     dlm.message_type,
                     dlm.mmsi,
                     dlm.reservations.len()
-                );
+                ); */
             }
             AisMessage::AidToNavigationReport(aton) => {
                 
@@ -129,39 +129,39 @@ impl AisDecoder {
 
             }
             AisMessage::StaticDataReport(sdr) => {
-                println!("[Type {}] Static Data {}: {:?}", 
+                /* println!("[Type {}] Static Data {}: {:?}", 
                     sdr.message_type,
                     sdr.mmsi,
                     sdr.message_part
-                );
+                ); */
             }
             AisMessage::SafetyRelatedBroadcastMessage(srm) => {
-                println!("[Type {}] Safety Message from {}: {}", 
+                /* println!("[Type {}] Safety Message from {}: {}", 
                     srm.message_type,
                     srm.mmsi,
                     srm.text
-                );
+                ); */
             }
             AisMessage::BinaryBroadcastMessage(bbm) => {
-                println!("[Type {}] Binary Broadcast {}: {} bytes", 
+                /* println!("[Type {}] Binary Broadcast {}: {} bytes", 
                     bbm.message_type,
                     bbm.mmsi,
                     bbm.data.len()
-                );
+                ); */
             }
             AisMessage::UtcDateResponse(udr) => {
-                println!("[Type {}] UTC Date- hour: {}{}:{} UTC", 
+               /*  println!("[Type {}] UTC Date- hour: {}{}:{} UTC", 
                     udr.message_type,
                     udr.hour,
                     udr.minute.unwrap_or(0),
                     udr.second.unwrap_or(0),
-                );
+                ); */
             }
             AisMessage::AssignmentModeCommand(amc) => {
-                println!("[Type {}] AMC for MMSI {}", 
+               /*  println!("[Type {}] AMC for MMSI {}", 
                     amc.message_type,
                     amc.mmsi
-                );
+                ); */
             }
             // Add other message types as needed
             _ => println!("[Type s] Unhandled message format",),
