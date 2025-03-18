@@ -84,7 +84,7 @@ impl AisDecoder {
             AisMessage::AidToNavigationReport(aton) => {
                  let (status_byte, page_id) = self.extract_aton_status(raw_sentence)? ;
                     // Parse status components for Page ID 7 (Most common operational status)
-                   //if page_id == 7 {
+                   if page_id == 7 {
                         let (racon_status, light_status) = parse_aton_status(status_byte.reverse_bits(), page_id);
                         println!(
                             "[Type {}] AtoN {}: {} ({:?})",
@@ -219,7 +219,7 @@ impl AisDecoder {
             .context("Invalid binary status bits")?;
     
         // Step 6: Extract page ID (first 3 bits of the status byte)
-        let page_id = (status_byte >> 5) & 0b111;
+        let page_id = (status_byte.reverse_bits() >> 5) & 0b111; //changed reverse
     
         Ok((status_byte, page_id))
     }
