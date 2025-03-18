@@ -115,13 +115,13 @@ impl AisDecoder {
                     println!("Dalmatian AtoN: {}", aton.name);
                 } */
 
-                /*
+                
                 println!("[Type {}] AtoN {}: {} ({:?})",
                     aton.message_type,
                     aton.mmsi,
                     aton.name,
                     aton.aid_type,);
-                     */
+                     
             }
             AisMessage::StaticDataReport(sdr) => {
                 /* println!("[Type {}] Static Data {}: {:?}",
