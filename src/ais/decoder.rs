@@ -197,32 +197,33 @@ impl AisDecoder {
         // Step 1: Validate NMEA structure
         let parts: Vec<&str> = nmea_sentence.split(',').collect();
         anyhow::ensure!(parts.len() >= 6, "Invalid NMEA format");
-
-        // Step 2: Extract payload
+    
+        // Step 2: Extract payload (5th field of NMEA sentence)
         let payload = parts[5];
         anyhow::ensure!(!payload.is_empty(), "Empty payload");
-
-        // Step 3: Convert to binary
+    
+        // Step 3: Convert payload to binary representation
         let binary = self
             .payload_to_binary(payload)
             .context("Failed to convert payload to binary")?;
-
-        // Step 4: Validate binary length
+    
+        // Step 4: Validate binary length (Message 21 requires at least 156 bits)
         anyhow::ensure!(
             binary.len() >= 156,
-            format!("Payload too short ({} bits)", binary.len())
+            format!("Payload too short ({} bits, expected >=156)", binary.len())
         );
-
+    
         // Step 5: Extract status bits (148-155 inclusive)
         let status_bits = &binary[148..156];
-        let status_byte =
-            u8::from_str_radix(status_bits, 2).context("Invalid binary status bits")?;
-
-        // Step 6: Extract page ID (first 3 bits)
+        let status_byte = u8::from_str_radix(status_bits, 2)
+            .context("Invalid binary status bits")?;
+    
+        // Step 6: Extract page ID (first 3 bits of the status byte)
         let page_id = (status_byte >> 5) & 0b111;
-
-        Ok((status_byte, (status_byte >> 5) & 0b111))
+    
+        Ok((status_byte, page_id))
     }
+    
    
 }
 pub fn parse_aton_status(status_byte: u8, page_id: u8) -> (RaconStatus, LightStatus) {
