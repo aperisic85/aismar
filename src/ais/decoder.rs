@@ -225,7 +225,8 @@ impl AisDecoder {
         );
     
         // Step 5: Extract status bits (148-155 inclusive)
-        let status_bits = &binary[148..156];
+        let start_index = binary.len() - 8;
+        let status_bits = &binary[start_index..];
         let  status_byte = u8::from_str_radix(status_bits, 2)
             .context("Invalid binary status bits")?;
         //let status_byte = status_byte.reverse_bits(); //changed reverse
@@ -238,7 +239,7 @@ impl AisDecoder {
     println!("Status Byte (before reversal): {:08b}", status_byte);
  */
     // Reverse bits if necessary
-    let reverse_status_byte= status_byte.reverse_bits();
+    //let reverse_status_byte= status_byte.reverse_bits();
     //println!("Status Byte (after reversal): {:08b}", status_byte);
 
     let page_id = (status_byte >> 5) & 0b111;
