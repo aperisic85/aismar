@@ -12,9 +12,10 @@ impl Default for AisConfig {
     fn default() -> Self {
         Self {
             endpoints: vec![
-                "192.168.51.121:4712".into(),       // Primary source
-                "ais.example.com:10110".into(),     // Secondary source
-                "aisfeed.openshoring.io:4712".into()// Tertiary source
+                "192.168.55.161:4712".into(), // Labinstica
+            "192.168.52.162:4712".into(), // VDG
+            "192.168.61.162:4712".into(), // ucka
+            "192.168.6.162:4712".into(),// Tertiary source
             ],
             max_reconnect_attempts: 5,
             reconnect_delay: Duration::from_secs(5),

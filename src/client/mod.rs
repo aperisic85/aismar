@@ -30,7 +30,7 @@ impl AisClient {
 
             let handle = tokio::spawn(async move {
                 let mut attempt = 0;
-
+                println!("Connecting to {}", endpoint);
                 loop {
                     match TcpStream::connect(&endpoint).await {
                         Ok(stream) => {
