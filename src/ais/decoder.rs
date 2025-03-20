@@ -42,7 +42,7 @@ impl AisDecoder {
     }
     
 
-    async fn handle_message(&self, msg: AisMessage, raw_sentence: &str) -> Result<()> {
+    pub async fn handle_message(&self, msg: AisMessage, raw_sentence: &str) -> Result<()> {
         match msg {
             AisMessage::PositionReport(pos) => {
                 /* println!("[Type {}] Vessel {}: {:?} {:?} | SOG: {} kt",

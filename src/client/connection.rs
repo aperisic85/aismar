@@ -1,5 +1,6 @@
 use crate::{ais::decoder, config::AisConfig};
 use anyhow::Context;
+use serde::de;
 use std::sync::Arc;
 use tokio::io::AsyncBufReadExt;
 use tokio::{io::BufReader, net::TcpStream, time};
@@ -58,8 +59,8 @@ impl AisConnection {
                 }
                 Ok(Err(e)) => return Err(e).context("Read error"),
                 Err(_) => return Err(anyhow::anyhow!("Read timeout")),
-            }
-        }
+            } 
+       }
 
         Ok(())
     }
