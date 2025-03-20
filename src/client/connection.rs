@@ -8,6 +8,7 @@ use tokio::task::{JoinHandle, JoinError};
 use tokio::sync::mpsc;
 use tokio::sync::mpsc::Sender;
 use tokio::sync::Mutex;
+use ais::AisFragments;
 
 pub struct AisConnection {
     stream: BufReader<TcpStream>,
@@ -32,7 +33,7 @@ impl AisConnection {
         }
     }
 
-    pub async fn handle(mut self) -> anyhow::Result<()> {
+   /*  pub async fn handle(mut self) -> anyhow::Result<()> {
         let mut buffer = String::new();
 
         loop {
@@ -63,7 +64,44 @@ impl AisConnection {
        }
 
         Ok(())
+    } */
+
+    pub async fn handle(mut self) -> anyhow::Result<()> {
+        let mut buffer = String::new();
+        
+        loop {
+            buffer.clear();
+            let read_result = tokio::time::timeout(
+                self.config.read_timeout,
+                self.stream.read_line(&mut buffer)
+            ).await;
+    
+            match read_result {
+                Ok(Ok(0)) => break, // Clean disconnect
+                Ok(Ok(_)) => {
+                    let line = buffer.trim_end();
+                    let mut decoder = self.decoder.lock().await;
+                    match decoder.parser.parse(line.as_bytes(), true) {
+                        Ok(AisFragments::Complete(sentence)) => {
+                            if let Some(msg) = sentence.message {
+                                if let Err(e) = decoder.handle_message(msg, line).await {
+                                    eprintln!("Message handling error: {}", e);
+                                }
+                            }
+                        }
+                        Err(e) => eprintln!("Parsing error: {}", e),
+                        _ => {} // Handle incomplete fragments if needed
+                    }
+                }
+                Ok(Err(e)) => return Err(e).context("Read error"),
+                Err(_) => return Err(anyhow::anyhow!("Read timeout")),
+            }
+        }
+        
+        Ok(())
     }
+    
+    
 }
 
 impl AisConnectionManager {

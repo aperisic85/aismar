@@ -6,7 +6,7 @@ use anyhow::Result;
 
 #[derive(Debug)]
 pub struct AisDecoder {
-    parser: AisParser,
+    pub parser: AisParser,
 }
 
 impl AisDecoder {
