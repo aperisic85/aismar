@@ -45,13 +45,13 @@ impl AisDecoder {
     pub async fn handle_message(&self, msg: AisMessage, raw_sentence: &str) -> Result<()> {
         match msg {
             AisMessage::PositionReport(pos) => {
-                /* println!("[Type {}] Vessel {}: {:?} {:?} | SOG: {} kt",
+                 println!("[Type {}] Vessel {}: {:?} {:?} | SOG: {} kt",
                     pos.message_type,
                     pos.mmsi,
                     pos.latitude.unwrap_or(0.0),
                     pos.longitude.unwrap_or(0.0),
                     pos.speed_over_ground.unwrap_or(0.0)
-                ); */
+                ); 
             }
             AisMessage::BaseStationReport(bs) => {
                 /*  println!("[Type {}] Base Station {}: {:?} UTC",
