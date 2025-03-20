@@ -1,4 +1,5 @@
 use super::msg21::{LightStatus, RaconStatus, GeneralHealth};
+use ais::messages::AisMessageType;
 use ais::{AisFragments, AisParser, messages::AisMessage};
 use anyhow::Context;
 
@@ -45,13 +46,14 @@ impl AisDecoder {
     pub async fn handle_message(&self, msg: AisMessage, raw_sentence: &str) -> Result<()> {
         match msg {
             AisMessage::PositionReport(pos) => {
-                 println!("[Type {}] Vessel {}: {:?} {:?} | SOG: {} kt | Nav Status: {:?}",
+                 println!("[Type {}] Vessel {}: {:?} {:?} | SOG: {} kt | Nav Status: {:?}, name {}",
                     pos.message_type,
                     pos.mmsi,
                     pos.latitude.unwrap_or(0.0),
                     pos.longitude.unwrap_or(0.0),
                     pos.speed_over_ground.unwrap_or(0.0),
                     pos.navigation_status.unwrap_or(ais::messages::position_report::NavigationStatus::Unknown(2)),
+                    pos.name()
                 ); 
             }
             AisMessage::BaseStationReport(bs) => {
