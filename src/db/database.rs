@@ -1,5 +1,5 @@
-use sqlx::PgPool;
 use ais::messages::position_report::PositionReport;
+use sqlx::PgPool;
 
 pub async fn insert_position_report(pool: &PgPool, pos: PositionReport) -> Result<(), sqlx::Error> {
     sqlx::query!(

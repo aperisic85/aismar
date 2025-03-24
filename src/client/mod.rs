@@ -1,13 +1,13 @@
 // Declare the connection submodule
 pub mod connection;
-use crate::{config::AisConfig};
-use std::sync::Arc;
-use ais::messages::{position_report, AisMessage};
-use tokio::{net::TcpStream, task::JoinHandle, time};
-use connection::AisConnection;
-use tokio::sync::mpsc::{self, Sender};
-use sqlx::{pool, PgPool};
+use crate::config::AisConfig;
 use crate::db::database::insert_position_report;
+use ais::messages::{AisMessage, position_report};
+use connection::AisConnection;
+use sqlx::{PgPool, pool};
+use std::sync::Arc;
+use tokio::sync::mpsc::{self, Sender};
+use tokio::{net::TcpStream, task::JoinHandle, time};
 
 pub struct AisClient {
     config: Arc<AisConfig>,
@@ -22,9 +22,9 @@ impl AisClient {
         }
     }
 
-    pub async fn run(&mut self,pool: Arc<sqlx::PgPool>) -> anyhow::Result<()> {
+    pub async fn run(&mut self, pool: Arc<sqlx::PgPool>) -> anyhow::Result<()> {
         let (tx, mut rx) = mpsc::channel(100); // Create a channel for communication
-        let pool =pool.clone();
+        let pool = pool.clone();
         // Spawn a connection task for each endpoint
         for endpoint in &self.config.endpoints {
             let endpoint = endpoint.clone();
@@ -63,21 +63,27 @@ impl AisClient {
 
             self.handles.push(handle);
         }
-        
+
         // Monitor received messages from all connections
         tokio::spawn(async move {
             while let Some(message) = rx.recv().await {
                 //println!("Received decoded message: {:?}", message); for debug
-                
+
                 match message {
-                   AisMessage::PositionReport(pos) => {
-                    let ms = format!("type: {} MMSI: {} lat: {} lon: {}", pos.message_type,pos.mmsi, pos.latitude.unwrap_or(0.0), pos.longitude.unwrap_or(0.0));
-                    println!("{}", ms);
-                    if let Err(e) = insert_position_report(&pool.clone(), pos).await {
-                        eprintln!("Failed to insert into database: {}", e);
+                    AisMessage::PositionReport(pos) => {
+                        let ms = format!(
+                            "type: {} MMSI: {} lat: {} lon: {}",
+                            pos.message_type,
+                            pos.mmsi,
+                            pos.latitude.unwrap_or(0.0),
+                            pos.longitude.unwrap_or(0.0)
+                        );
+                        println!("{}", ms);
+                        if let Err(e) = insert_position_report(&pool.clone(), pos).await {
+                            eprintln!("Failed to insert into database: {}", e);
+                        }
                     }
-                   } 
-                    _ => () //println!("[Type s] Unhandled message format",),
+                    _ => (), //println!("[Type s] Unhandled message format",),
                 }
             }
         });
