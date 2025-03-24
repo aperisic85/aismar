@@ -1,6 +1,11 @@
 mod ais;
 mod client;
 mod config;
+mod db;
+use sqlx::PgPool;
+use std::env;
+use std::sync::Arc;
+use dotenvy::dotenv;
 
 
 use crate::config::AisConfig;
@@ -8,6 +13,10 @@ use crate::client::connection::AisConnectionManager;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    dotenv().ok();
+    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL not found in .env");
+    let pool = PgPool::connect(&database_url).await.unwrap();
+    let pool = Arc::new(pool);
     // Create configuration with multiple endpoints
     let config = AisConfig {
         endpoints: vec![
@@ -23,7 +32,7 @@ async fn main() -> anyhow::Result<()> {
     // Instantiate the connection manager
     //let mut manager = AisConnectionManager::new(config);
     let mut client = client::AisClient::new(config);
-    client.run().await?;
+    client.run(pool).await?;
     // Start the connection manager
    //manager.start().await?;
 
