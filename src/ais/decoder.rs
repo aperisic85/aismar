@@ -4,6 +4,7 @@ use ais::{AisFragments, AisParser, messages::AisMessage};
 use anyhow::Context;
 
 use anyhow::Result;
+use tokio::sync::mpsc::Sender;
 
 #[derive(Debug)]
 pub struct AisDecoder {
@@ -43,140 +44,10 @@ impl AisDecoder {
     }
     
 
-    pub async fn handle_message(&self, msg: AisMessage, raw_sentence: &str) -> Result<()> {
-        match msg {
-            AisMessage::PositionReport(pos) => {
-                 println!("[Type {}] Vessel {}: {:?} {:?} | SOG: {} kt | Nav Status: {:?}, name {}",
-                    pos.message_type,
-                    pos.mmsi,
-                    pos.latitude.unwrap_or(0.0),
-                    pos.longitude.unwrap_or(0.0),
-                    pos.speed_over_ground.unwrap_or(0.0),
-                    pos.navigation_status.unwrap_or(ais::messages::position_report::NavigationStatus::Unknown(2)),
-                    pos.name()
-                ); 
-            }
-            AisMessage::BaseStationReport(bs) => {
-                /*  println!("[Type {}] Base Station {}: {:?} UTC",
-                    bs.message_type,
-                    bs.mmsi,
-                    bs.hour
-                ); */
-            }
-            AisMessage::StaticAndVoyageRelatedData(sdv) => {
-                /*  println!("[Type {}] Vessel {}: {} → {}",
-                    sdv.message_type,
-                    sdv.mmsi,
-                    sdv.vessel_name,
-                    sdv.destination
-                ); */
-            }
-            AisMessage::StandardClassBPositionReport(scb) => {
-                /*  println!("[Type {}] Class B {}: {:?} {:?} COG: {}",
-                    scb.message_type,
-                    scb.mmsi,
-                    scb.latitude.unwrap_or(0.0),
-                    scb.longitude.unwrap_or(0.0),
-                    scb.course_over_ground.unwrap_or(0.0)
-                ); */
-            }
-            AisMessage::ExtendedClassBPositionReport(ecb) => {
-                /* println!("[Type {}] Ext. Class B {}: {:?} {:?}",
-                    ecb.message_type,
-                    ecb.mmsi,
-                    ecb.latitude.unwrap_or(0.0),
-                    ecb.longitude.unwrap_or(0.0)
-                ); */
-            }
-            AisMessage::DataLinkManagementMessage(dlm) => {
-                /*  println!("[Type {}] DLM {}: Reservation {}",
-                    dlm.message_type,
-                    dlm.mmsi,
-                    dlm.reservations.len()
-                ); */
-            }
-            AisMessage::AidToNavigationReport(aton) => {
-                 let (status_byte, page_id) = self.extract_aton_status(raw_sentence)? ;
-                    // Parse status components for Page ID 7 (Most common operational status)
-                   if page_id == 7 {
-                        let (racon_status, light_status, health) = parse_aton_status(status_byte.reverse_bits());
-                        println!(
-                            "[Type {}] AtoN {}: {} ({:?})",
-                            aton.message_type, aton.mmsi, aton.name, aton.aid_type
-                        );
-                        println!(
-                            "  → Status: Page {} | RACON: {:?} | Light: {:?} | Off-position: {}",
-                            page_id, racon_status, light_status, aton.off_position
-                        );
-                    
-
-                    /* println!("[Type {}] AtoN {}: {} ({:?})",
-                        aton.message_type,
-                        aton.mmsi,
-                        aton.name,
-                        aton.aid_type
-                    );
-                    println!("  → Status: Page {} | RACON: {:?} | Light: {:?} | Off-position: {}",
-                        page_id,
-                        racon_status,
-                        light_status,
-                        aton.off_position
-                    ); */
-                }
-
-                /* if (43.0..44.0).contains(&aton.latitude.unwrap_or(0 as f32)) &&
-                   (16.0..17.0).contains(&aton.longitude.unwrap_or(0.0)) {
-                    println!("Dalmatian AtoN: {}", aton.name);
-                } */
-
-                
-               /*  println!("[Type {}] AtoN {}: {} ({:?})",
-                    aton.message_type,
-                    aton.mmsi,
-                    aton.name,
-                    aton.aid_type,);    */
-                     
-           }
-            AisMessage::StaticDataReport(sdr) => {
-                /* println!("[Type {}] Static Data {}: {:?}",
-                    sdr.message_type,
-                    sdr.mmsi,
-                    sdr.message_part
-                ); */
-            }
-            AisMessage::SafetyRelatedBroadcastMessage(srm) => {
-                /* println!("[Type {}] Safety Message from {}: {}",
-                    srm.message_type,
-                    srm.mmsi,
-                    srm.text
-                ); */
-            }
-            AisMessage::BinaryAcknowledgeMessage(ba) => { /* Type 7  TODO*/ }
-
-            AisMessage::BinaryBroadcastMessage(bbm) => {
-                /* println!("[Type {}] Binary Broadcast {}: {} bytes",
-                    bbm.message_type,
-                    bbm.mmsi,
-                    bbm.data.len()
-                ); */
-            }
-            AisMessage::UtcDateResponse(udr) => {
-                /*  println!("[Type {}] UTC Date- hour: {}{}:{} UTC",
-                    udr.message_type,
-                    udr.hour,
-                    udr.minute.unwrap_or(0),
-                    udr.second.unwrap_or(0),
-                ); */
-            }
-            AisMessage::AssignmentModeCommand(amc) => {
-                /*  println!("[Type {}] AMC for MMSI {}",
-                    amc.message_type,
-                    amc.mmsi
-                ); */
-            }
-            // Add other message types as needed
-            _ => println!("[Type s] Unhandled message format",),
-        }
+    pub async fn handle_message(&self, msg: AisMessage, raw_sentence: &str, tx : Sender<AisMessage>) -> Result<()> {
+       
+        tx.send(msg).await?;
+        
         Ok(())
     }
 
