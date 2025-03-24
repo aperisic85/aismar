@@ -7,13 +7,9 @@ use sqlx::PgPool;
 use std::env;
 use std::sync::Arc;
 
-use crate::client::connection::AisConnectionManager;
 use crate::config::AisConfig;
 use axum::{Json, Router, http::StatusCode, routing::get};
-use chrono::NaiveDateTime;
-use serde::Serialize;
 use sqlx::FromRow;
-use std::net::SocketAddr;
 
 #[derive(serde::Serialize, FromRow)]
 struct AisPosition {
@@ -91,19 +87,29 @@ async fn main() -> anyhow::Result<()> {
 
     // Define the Axum application with the route
     let app = Router::new()
-        .route("/positions", get({
-            let pool = pool.clone(); // Clone the Arc to move into the closure
-            move || async move { get_positions(pool).await }
-        }),)
-        .route("/last_positions", get({
-            let pool = pool.clone(); 
-            move || async move { get_last_positions(pool).await }
-        }));
+        .route(
+            "/positions",
+            get({
+                let pool = pool.clone(); // Clone the Arc to move into the closure
+                move || async move { get_positions(pool).await }
+            }),
+        )
+        .route(
+            "/last_positions",
+            get({
+                let pool = pool.clone();
+                move || async move { get_last_positions(pool).await }
+            }),
+        );
 
     // run our app with hyper, listening globally on port 3000
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
-    axum::serve(listener, app).await.unwrap();
 
+    let api_server = tokio::spawn(async move {
+        let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
+        axum::serve(listener, app).await.unwrap();
+    });
+
+    api_server.await.unwrap(); //start API server in async spawn
     // Wait for Ctrl+C signal to gracefully shut down
     tokio::signal::ctrl_c().await?;
     println!("Shutting down...");

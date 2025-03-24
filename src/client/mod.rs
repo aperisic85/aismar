@@ -2,11 +2,10 @@
 pub mod connection;
 use crate::config::AisConfig;
 use crate::db::database::insert_position_report;
-use ais::messages::{AisMessage, position_report};
+use ais::messages::AisMessage;
 use connection::AisConnection;
-use sqlx::{PgPool, pool};
 use std::sync::Arc;
-use tokio::sync::mpsc::{self, Sender};
+use tokio::sync::mpsc::{self};
 use tokio::{net::TcpStream, task::JoinHandle, time};
 
 pub struct AisClient {
