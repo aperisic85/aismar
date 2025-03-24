@@ -2,6 +2,7 @@
 pub mod connection;
 use crate::{ais::decoder, config::AisConfig};
 use std::sync::Arc;
+use ais::messages::{position_report, AisMessage};
 use tokio::{net::TcpStream, task::JoinHandle, time};
 use connection::AisConnection;
 use tokio::sync::mpsc::{self, Sender};
@@ -64,7 +65,15 @@ impl AisClient {
         // Monitor received messages from all connections
         tokio::spawn(async move {
             while let Some(message) = rx.recv().await {
-                println!("Received decoded message: {:?}", message);
+                //println!("Received decoded message: {:?}", message); for debug
+                
+                match message {
+                   AisMessage::PositionReport(pos) => {
+                    let ms = format!("type: {} MMSI: {} lat: {} lon: {}", pos.message_type,pos.mmsi, pos.latitude.unwrap_or(0.0), pos.longitude.unwrap_or(0.0));
+                    println!("{}", ms);
+                   } 
+                    _ => () //println!("[Type s] Unhandled message format",),
+                }
             }
         });
 
